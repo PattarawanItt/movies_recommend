@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Movie Recommender Chatbot</title>
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
+    input, button { padding: 0.5rem; width: 100%; margin-top: 1rem; }
+    #chatContainer { margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <h2 class="title">🎬 Movie Recommender Chatbot</h2>
+  
+  <input id="userInput" placeholder="พิมพ์ชื่อหนัง เช่น The Avengers" />
+  <button onclick="sendMessage()">ค้นหา</button>
+  
+  <div id="chatContainer">
+    <div class="reply" id="replyBox"></div>
+    <div class="recommend" id="recommendBox"></div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("userInput").value;
+      const replyBox = document.getElementById("replyBox");
+      const recommendBox = document.getElementById("recommendBox");
+
+      replyBox.innerHTML = "⏳ กำลังถาม AI...";
+      recommendBox.innerHTML = "";
+
+      try {
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: input, language: "th" }),
+        });
+        const data = await res.json();
+
+        if (data.recommendations && data.recommendations.length > 0) {
+          const listItems = data.recommendations
+            .map(m => `<li>${m}</li>`)
+            .join("");
+          recommendBox.innerHTML = `<strong>🎥 แนะนำ:</strong><ul>${listItems}</ul>`;
+        }
+      } catch (err) {
+        replyBox.innerHTML = "เกิดข้อผิดพลาดในการเชื่อมต่อ";
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
